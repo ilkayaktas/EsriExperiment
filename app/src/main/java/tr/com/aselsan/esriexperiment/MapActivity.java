@@ -1,6 +1,7 @@
 package tr.com.aselsan.esriexperiment;
 
 import android.os.Bundle;
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
@@ -14,6 +15,7 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 
 public class MapActivity extends AppCompatActivity {
 
+    private static final String TAG = "MapActivity";
     private MapView mapView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,13 @@ public class MapActivity extends AppCompatActivity {
         mapView.setMap(map);
         mapView.setViewpoint(new Viewpoint(34.056295, -117.195800, 10000));
 
+        mapView.addMapRotationChangedListener(m -> {
+            Log.d(TAG, "Map rotation changed! " + m.getSource().getRotation());
+        });
+
+        mapView.addMapScaleChangedListener(m -> {
+            Log.d(TAG, "Map scale changed! " + m.getSource().getMapScale());
+        });
 
     }
 

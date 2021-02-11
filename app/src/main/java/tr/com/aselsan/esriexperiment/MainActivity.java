@@ -19,4 +19,8 @@ public class MainActivity extends AppCompatActivity {
     public void openMapView(View view) {
         startActivity(new Intent(this, MapActivity.class));
     }
+
+    public void openSceneView(View view) {
+        startActivity(new Intent(this, SceneActivity.class));
+    }
 }
