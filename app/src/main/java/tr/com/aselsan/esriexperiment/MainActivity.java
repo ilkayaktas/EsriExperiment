@@ -27,4 +27,8 @@ public class MainActivity extends AppCompatActivity {
     public void openSpatialView(View view) {
         startActivity(new Intent(this, SpatialReferenceActivity.class));
     }
+
+    public void openOfflineView(View view) {
+        startActivity(new Intent(this, OfflineMapActivity.class));
+    }
 }
