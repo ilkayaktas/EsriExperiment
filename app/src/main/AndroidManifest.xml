@@ -23,6 +23,7 @@
         </activity>
         <activity android:name=".MapActivity" />
         <activity android:name=".SceneActivity" />
+        <activity android:name=".SpatialReferenceActivity" />
     </application>
 
 </manifest>

@@ -5,6 +5,8 @@ import android.util.Log;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.geometry.Envelope;
+import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
@@ -19,6 +21,7 @@ public class MapActivity extends AppCompatActivity {
 
     private static final String TAG = "MapActivity";
     private MapView mapView;
+    double timeRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,10 +29,24 @@ public class MapActivity extends AppCompatActivity {
 
         ArcGISRuntimeEnvironment.setApiKey(MainActivity.API_KEY);
         mapView = findViewById(R.id.mapView);
+
         ArcGISMap map = new ArcGISMap(BasemapStyle.ARCGIS_DARK_GRAY);
+        map.setMinScale(8000);
+        map.setMaxScale(2000);
+
         mapView.setMap(map);
         setLoadStatus(map);
-        mapView.setViewpoint(new Viewpoint(34.056295, -117.195800, 10000));
+
+        timeRef = System.currentTimeMillis();
+        // Initial map are
+        // Setting the initial viewpoint is useful when a user wishes to first load the map at a particular area of interest.
+        Envelope initialExtent = new Envelope(-12211308.778729, 4645116.003309, -12208257.879667, 4650542.535773,
+                SpatialReference.create(102100));
+        Viewpoint viewpoint = new Viewpoint(initialExtent);
+        mapView.setViewpoint(viewpoint);
+
+        // Initial map location
+        //mapView.setViewpoint(new Viewpoint(34.056295, -117.195800, 10000));
 
         mapView.addMapRotationChangedListener(m -> {
             Log.d(TAG, "Map rotation changed! " + m.getSource().getRotation());
@@ -62,7 +79,8 @@ public class MapActivity extends AppCompatActivity {
                     break;
 
                 case "LOADED":
-                    Toasty.success(this, "Map Loaded!", Toast.LENGTH_SHORT, true).show();
+                    double loadTime = System.currentTimeMillis();
+                    Toasty.success(this, "Map Loaded in " + (loadTime - timeRef)/1000 + " ms!", Toast.LENGTH_SHORT, true).show();
                     break;
 
                 default:

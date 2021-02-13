@@ -23,4 +23,8 @@ public class MainActivity extends AppCompatActivity {
     public void openSceneView(View view) {
         startActivity(new Intent(this, SceneActivity.class));
     }
+
+    public void openSpatialView(View view) {
+        startActivity(new Intent(this, SpatialReferenceActivity.class));
+    }
 }
