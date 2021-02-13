@@ -31,4 +31,8 @@ public class MainActivity extends AppCompatActivity {
     public void openOfflineView(View view) {
         startActivity(new Intent(this, OfflineMapActivity.class));
     }
+
+    public void openOfflineGeopackageView(View view) {
+        startActivity(new Intent(this, GeoPackageActivity.class));
+    }
 }

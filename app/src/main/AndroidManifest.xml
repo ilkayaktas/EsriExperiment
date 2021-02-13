@@ -25,6 +25,7 @@
         <activity android:name=".SceneActivity" />
         <activity android:name=".SpatialReferenceActivity" />
         <activity android:name=".OfflineMapActivity" />
+        <activity android:name=".GeoPackageActivity" />
     </application>
 
 </manifest>

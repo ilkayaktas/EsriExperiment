@@ -25,8 +25,6 @@ import es.dmoral.toasty.Toasty;
 
 public class OfflineMapActivity  extends AppCompatActivity {
 
-    public static final String API_KEY = "AAPK316414d3c0bb45ac8d219331ff89819a_O4tHEfo2H3ytTW2BT8iIyrH5hY-8K2FLOAl2JwfuobtWyTk_2tuA00E6gnrUv9x";
-
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private MapView mapView;
