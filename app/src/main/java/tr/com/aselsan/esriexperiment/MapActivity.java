@@ -45,8 +45,8 @@ public class MapActivity extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
 
         ArcGISMap map = new ArcGISMap(BasemapStyle.OSM_STANDARD_RELIEF_BASE);
-        map.setMinScale(20000);
-        map.setMaxScale(2000);
+        map.setMinScale(50000);
+        map.setMaxScale(500);
 
         mapView.setMap(map);
         setLoadStatus(map);
@@ -91,6 +91,35 @@ public class MapActivity extends AppCompatActivity {
         graphicsOverlay.getGraphics().add(path);
 
         addMapClicked();
+
+        showGrid();
+    }
+
+    private void showGrid() {
+        LatitudeLongitudeGrid grid = new LatitudeLongitudeGrid();
+        mapView.setGrid(grid);
+    }
+
+    private void centerPointAndRorate(Point mapPoint){
+        Viewpoint center = new Viewpoint(mapPoint, 2000);
+        mapView.setViewpointAsync(center, 0.5f, AnimationCurve.EASE_IN_OUT_SINE);
+        //mapView.setViewpointCenterAsync(mapPoint, 5000);
+        mapView.setViewpointRotationAsync(Math.random()*100);
+    }
+
+    private void showCallout(Point wgs84Point){
+        TextView calloutContent = new TextView(getApplicationContext());
+        calloutContent.setTextColor(Color.BLACK);
+        calloutContent.setSingleLine();
+        // format coordinates to 4 decimal places
+        calloutContent.setText("Lat: " + String.format("%.4f", wgs84Point.getY()) + ", Lon: " + String.format("%.4f", wgs84Point.getX()));
+
+        // get callout, set content and show
+        Callout mCallout = mapView.getCallout();
+        mCallout.setLocation(wgs84Point);
+        mCallout.setContent(calloutContent);
+        mCallout.show();
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -111,6 +140,8 @@ public class MapActivity extends AppCompatActivity {
                 Graphic po = new Graphic(mapPoint, locationMarker);
                 graphicsOverlay.getGraphics().add(po);
 
+                centerPointAndRorate(mapPoint);
+                showCallout(wgs84Point);
                 Toasty.info(MapActivity.this, wgs84Point.getX()+" "+wgs84Point.getY(), Toasty.LENGTH_SHORT).show();
             }
 
