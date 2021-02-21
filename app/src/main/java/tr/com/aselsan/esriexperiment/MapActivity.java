@@ -10,15 +10,19 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.geometry.*;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.*;
+import com.esri.arcgisruntime.symbology.DictionaryRenderer;
+import com.esri.arcgisruntime.symbology.DictionarySymbolStyle;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import es.dmoral.toasty.Toasty;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by ilkayaktas on 2/11/21 at 1:41 PM.
@@ -45,8 +49,8 @@ public class MapActivity extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
 
         ArcGISMap map = new ArcGISMap(BasemapStyle.OSM_STANDARD_RELIEF_BASE);
-        map.setMinScale(50000);
-        map.setMaxScale(500);
+        //map.setMinScale(5000000);
+        //map.setMaxScale(500);
 
         mapView.setMap(map);
         setLoadStatus(map);
@@ -60,7 +64,7 @@ public class MapActivity extends AppCompatActivity {
         mapView.setViewpoint(viewpoint);*/
 
         // Initial map location
-        mapView.setViewpoint(new Viewpoint(39.9969, 32.7517, 4000));
+        mapView.setViewpoint(new Viewpoint(39.9256, 32.8380, 4000));
 
         mapView.addMapRotationChangedListener(m -> {
             Log.d(TAG, "Map rotation changed! " + m.getSource().getRotation());
@@ -75,7 +79,7 @@ public class MapActivity extends AppCompatActivity {
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
         // Start point
-        startPoint = new Point(32.7517, 39.9969, SpatialReferences.getWgs84());
+        startPoint = new Point(32.8380, 39.9256, SpatialReferences.getWgs84());
         SimpleMarkerSymbol locationMarker = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.CYAN, 30);
         startLocation = new Graphic(startPoint, locationMarker);
         graphicsOverlay.getGraphics().add(startLocation);
@@ -90,9 +94,26 @@ public class MapActivity extends AppCompatActivity {
         path.setSymbol(new SimpleLineSymbol(SimpleLineSymbol.Style.SHORT_DASH, Color.RED, 5));
         graphicsOverlay.getGraphics().add(path);
 
+        loadMil2525dStyle();
+
         addMapClicked();
 
         showGrid();
+    }
+
+    private void loadMil2525dStyle() {
+        DictionarySymbolStyle mSymbolDictionary = DictionarySymbolStyle.createFromFile(getExternalFilesDir(null) + "/mil2525d.stylx");
+        mSymbolDictionary.loadAsync();
+
+        mSymbolDictionary.addDoneLoadingListener(() -> {
+            if (mSymbolDictionary.getLoadStatus() == LoadStatus.LOADED) {
+                Toasty.success(MapActivity.this, "Symbology loaded!").show();
+
+                DictionaryRenderer renderer = new DictionaryRenderer(mSymbolDictionary);
+                graphicsOverlay.setRenderer(renderer);
+            }
+
+        });
     }
 
     private void showGrid() {
@@ -122,6 +143,25 @@ public class MapActivity extends AppCompatActivity {
 
     }
 
+    private void showMilitarySymbol(Point point){
+
+        int wkid = 3857;
+        SpatialReference spatialReference = SpatialReference.create(wkid);
+        PointCollection points = new PointCollection(spatialReference);
+        Point p = new Point(point.getX(), point.getY(), spatialReference);
+        points.add(p);
+
+        HashMap<String, Object> attributes = new HashMap<>();
+        attributes.put("identity", "3"); // Kimlik bilgisi. Dost, Düşman, Tarafsız
+        attributes.put("symbolset", "15");
+        attributes.put("symbolentity", "170300");
+        attributes.put("status", "4");
+        attributes.put("echelon", "12"); // Commander
+    //    attributes.put("modifier2", "51");
+        attributes.put("uniquedesignation", "İlkay Aktaş");
+        graphicsOverlay.getGraphics().add(new Graphic(new Multipoint(points), attributes));
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void addMapClicked() {
         // add onTouchListener to get the location of the user tap
@@ -137,9 +177,10 @@ public class MapActivity extends AppCompatActivity {
                 Point mapPoint = mMapView.screenToLocation(clickLocation);
                 // WGS84 displays lotitude longitude
                 Point wgs84Point = (Point) GeometryEngine.project(mapPoint, SpatialReferences.getWgs84());
-                Graphic po = new Graphic(mapPoint, locationMarker);
-                graphicsOverlay.getGraphics().add(po);
+//                Graphic po = new Graphic(mapPoint, locationMarker);
+//                graphicsOverlay.getGraphics().add(po);
 
+                showMilitarySymbol(mapPoint);
                 centerPointAndRorate(mapPoint);
                 showCallout(wgs84Point);
                 Toasty.info(MapActivity.this, wgs84Point.getX()+" "+wgs84Point.getY(), Toasty.LENGTH_SHORT).show();
